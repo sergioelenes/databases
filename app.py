@@ -5,7 +5,7 @@ import sqlalchemy
 import pandas as pd
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dbases/expensess.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////root/bdatos/expensess.sqlite3'
 db = SQLAlchemy(app)
 app.secret_key = "Macarenas"
 basic_auth = BasicAuth(app)
@@ -53,7 +53,7 @@ def reports():
 @basic_auth.required
 def year():
         try:
-                engine =  sqlalchemy.create_engine('sqlite:///dbases/expensess.sqlite3')
+                engine =  sqlalchemy.create_engine('sqlite:////root/bdatos/expensess.sqlite3')
                 df = pd.read_sql('expenses', engine)
                 df.style.format({'amount':'${.2f}'})
                 pivot = df.pivot_table(values='amount', index='concept', columns='month', aggfunc='sum', fill_value="-", margins=True, margins_name='Total')
@@ -68,7 +68,7 @@ def year():
 @basic_auth.required
 def bymonth():
         if request.method == 'POST':
-                engine =  sqlalchemy.create_engine('sqlite:///dbases/expensess.sqlite3')
+                engine =  sqlalchemy.create_engine('sqlite:////root/bdatos/expensess.sqlite3')
                 mess = request.form['elmess']
                 dflogstotal = pd.read_sql('expenses', engine, index_col=3)
                 pormes = dflogstotal[(dflogstotal['month']==mess)]
@@ -78,7 +78,7 @@ def bymonth():
 @basic_auth.required
 def alldata():
         expenselist = expenses.query.all()
-        engine =  sqlalchemy.create_engine('sqlite:///dbases/expensess.sqlite3')
+        engine =  sqlalchemy.create_engine('sqlite:////root/bdatos/expensess.sqlite3')
         df = pd.read_sql('expenses', engine)
         df.to_csv('dbases/alldata.csv', header=True, index=False)
         return render_template('alldata.html', expenses=expenselist)
@@ -93,13 +93,13 @@ def delete(id):
 @app.route('/downloadxls')
 @basic_auth.required
 def downloadxls ():
-        alldata = "dbases/alldata.csv"
+        alldata = "/root/bdatos/alldata.csv"
         return send_file(alldata, as_attachment=True)
 
 @app.route('/downloadsql')
 @basic_auth.required
 def downloadsql ():
-        alldata = "dbases/expensess.sqlite3"
+        alldata = "/root/bdatos/expensess.sqlite3"
         return send_file(alldata, as_attachment=True)
 
 
