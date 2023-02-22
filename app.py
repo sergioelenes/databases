@@ -3,9 +3,10 @@ from flask_basicauth import BasicAuth
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 import pandas as pd
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////root/bdatos/expensess.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', '')
 db = SQLAlchemy(app)
 app.secret_key = "Macarenas"
 basic_auth = BasicAuth(app)
@@ -53,7 +54,7 @@ def reports():
 @basic_auth.required
 def year():
         try:
-                engine =  sqlalchemy.create_engine('sqlite:////root/bdatos/expensess.sqlite3')
+                engine =  sqlalchemy.create_engine(os.getenv('DATABASE_URL', ''))
                 df = pd.read_sql('expenses', engine)
                 df.style.format({'amount':'${.2f}'})
                 pivot = df.pivot_table(values='amount', index='concept', columns='month', aggfunc='sum', fill_value="-", margins=True, margins_name='Total')
@@ -68,7 +69,7 @@ def year():
 @basic_auth.required
 def bymonth():
         if request.method == 'POST':
-                engine =  sqlalchemy.create_engine('sqlite:////root/bdatos/expensess.sqlite3')
+                engine =  sqlalchemy.create_engine(os.getenv('DATABASE_URL', ''))
                 mess = request.form['elmess']
                 dflogstotal = pd.read_sql('expenses', engine, index_col=3)
                 pormes = dflogstotal[(dflogstotal['month']==mess)]
@@ -78,7 +79,7 @@ def bymonth():
 @basic_auth.required
 def alldata():
         expenselist = expenses.query.all()
-        engine =  sqlalchemy.create_engine('sqlite:////root/bdatos/expensess.sqlite3')
+        engine =  sqlalchemy.create_engine(os.getenv('DATABASE_URL', ''))
         df = pd.read_sql('expenses', engine)
         df.to_csv('dbases/alldata.csv', header=True, index=False)
         return render_template('alldata.html', expenses=expenselist)
