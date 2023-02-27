@@ -6,7 +6,7 @@ import pandas as pd
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:41eb9838f37947cd820249d7c4df4a26@198.251.66.139:13020/bradexpenses'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', '')
 db = SQLAlchemy(app)
 app.secret_key = "Macarenas"
 basic_auth = BasicAuth(app)
@@ -19,19 +19,6 @@ class expenses(db.Model):
         concept = db.Column(db.String(50))
         amount = db.Column(db.Float)
         notes = db.Column(db.String(50))
-
-def creartabla():
-        db.session.execute("""
-                        CREATE TABLE IF NOT EXISTS expenses (
-                        id SERIAL PRIMARY KEY,
-                        month VARCHAR(50) NOT NULL, 
-                        concept VARCHAR(50) NOT NULL,
-                        amount FLOAT(50) NOT NULL,
-                        notes VARCHAR(50) NOT NULL
-                        )""")
-        db.session.commit()
-
-creartabla()
 
 @app.route("/", methods=['GET','POST'])
 @basic_auth.required
@@ -67,7 +54,7 @@ def reports():
 @basic_auth.required
 def year():
         try:
-                engine =  sqlalchemy.create_engine('postgresql://postgres:41eb9838f37947cd820249d7c4df4a26@198.251.66.139:13020/bradexpenses')
+                engine =  sqlalchemy.create_engine(os.getenv('DATABASE_URL', ''))
                 df = pd.read_sql('expenses', engine)
                 df.style.format({'amount':'${.2f}'})
                 pivot = df.pivot_table(values='amount', index='concept', columns='month', aggfunc='sum', fill_value="-", margins=True, margins_name='Total')
@@ -82,7 +69,7 @@ def year():
 @basic_auth.required
 def bymonth():
         if request.method == 'POST':
-                engine =  sqlalchemy.create_engine('postgresql://postgres:41eb9838f37947cd820249d7c4df4a26@198.251.66.139:13020/bradexpenses')
+                engine =  sqlalchemy.create_engine(os.getenv('DATABASE_URL', ''))
                 mess = request.form['elmess']
                 dflogstotal = pd.read_sql('expenses', engine, index_col=3)
                 pormes = dflogstotal[(dflogstotal['month']==mess)]
@@ -92,9 +79,9 @@ def bymonth():
 @basic_auth.required
 def alldata():
         expenselist = expenses.query.all()
-        engine =  sqlalchemy.create_engine('postgresql://postgres:41eb9838f37947cd820249d7c4df4a26@198.251.66.139:13020/bradexpenses')
+        engine =  sqlalchemy.create_engine(os.getenv('DATABASE_URL', ''))
         df = pd.read_sql('expenses', engine)
-        df.to_csv('dbases/alldata.csv', header=True, index=False)
+        df.to_csv(os.getenv('alldata.csv'), header=True, index=False)
         return render_template('alldata.html', expenses=expenselist)
 
 @app.route("/delete/<id>")
@@ -107,7 +94,7 @@ def delete(id):
 @app.route('/downloadxls')
 @basic_auth.required
 def downloadxls ():
-        alldata = "/root/bdatos/alldata.csv"
+        alldata = os.getenv('alldata.csv')
         return send_file(alldata, as_attachment=True)
 
 
