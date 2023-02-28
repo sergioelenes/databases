@@ -20,18 +20,18 @@ class expenses(db.Model):
         amount = db.Column(db.Float)
         notes = db.Column(db.String(50))
 
-def creartabla():
-        db.session.execute("""
-                        CREATE TABLE IF NOT EXISTS expenses (
-                        id SERIAL PRIMARY KEY,
-                        month VARCHAR(50) NOT NULL, 
-                        concept VARCHAR(50) NOT NULL,
-                        amount FLOAT(50) NOT NULL,
-                        notes VARCHAR(50) NOT NULL
-                        )""")
-        db.session.commit()
+#def creartabla():
+#        db.session.execute("""
+#                        CREATE TABLE IF NOT EXISTS expenses (
+#                        id SERIAL PRIMARY KEY,
+#                        month VARCHAR(50) NOT NULL, 
+#                        concept VARCHAR(50) NOT NULL,
+#                        amount FLOAT(50) NOT NULL,
+#                        notes VARCHAR(50) NOT NULL
+#                        )""")
+#        db.session.commit()
 
-creartabla()
+#creartabla()
 
 @app.route("/", methods=['GET','POST'])
 @basic_auth.required
