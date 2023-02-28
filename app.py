@@ -79,11 +79,14 @@ def bymonth():
 @app.route("/alldata", methods=['GET','POST'])
 @basic_auth.required
 def alldata():
-        expenselist = expenses.query.all()
-        engine =  sqlalchemy.create_engine('postgresql://postgres:41eb9838f37947cd820249d7c4df4a26@198.251.66.139:13020/bradexpenses')
-        df = pd.read_sql('expenses', engine)
-        df.to_csv('dbases/alldata.csv', header=True, index=False)
-        return render_template('alldata.html', expenses=expenselist)
+        try:
+                expenselist = expenses.query.all()
+                engine =  sqlalchemy.create_engine('postgresql://postgres:41eb9838f37947cd820249d7c4df4a26@198.251.66.139:13020/bradexpenses')
+                df = pd.read_sql('expenses', engine)
+                df.to_csv('dbases/alldata.csv', header=True, index=False)
+                return render_template('alldata.html', expenses=expenselist)
+        except ValueError:
+                return render_template('alldata.html')
 
 @app.route("/delete/<id>")
 @basic_auth.required
